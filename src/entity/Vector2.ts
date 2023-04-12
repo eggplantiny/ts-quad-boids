@@ -1,6 +1,4 @@
-export // src/Vector2.ts
-
-class Vector2 {
+export class Vector2 {
   x: number
   y: number
 
@@ -61,6 +59,12 @@ class Vector2 {
   // Calculate the angle of this vector
   heading(): number {
     return Math.atan2(this.y, this.x)
+  }
+
+  normalize() {
+    const magnitude = this.magnitude()
+    if (magnitude > 0)
+      this.divide(magnitude)
   }
 
   // Static methods

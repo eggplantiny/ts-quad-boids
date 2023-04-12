@@ -1,6 +1,9 @@
 import { Vector2 } from './Vector2'
 import type { QuadTree } from './QuadTree'
 import { Circle } from './Circle'
+import type { Blackhole } from '@/entity/Blackhole'
+import { generateRandomId } from '@/utils/random'
+import { Point } from '@/entity/Point'
 
 export class Boid {
   position: Vector2
@@ -8,28 +11,36 @@ export class Boid {
   acceleration: Vector2
   maxForce: number
   maxSpeed: number
+  id: string
 
   constructor(x: number, y: number) {
     this.position = new Vector2(x, y)
     this.velocity = Vector2.random()
     this.acceleration = new Vector2(0, 0)
     this.maxForce = 0.2
-    this.maxSpeed = 4
+    this.maxSpeed = 5
+    this.id = generateRandomId()
+  }
+
+  get point() {
+    return new Point(this.id, this.position.x, this.position.y, this)
   }
 
   // Flock behavior
-  flock(quadTree: QuadTree) {
+  flock(quadTree: QuadTree<Boid>, blackholes: Blackhole[]) {
     const alignment = this.align(quadTree)
     const cohesion = this.cohere(quadTree)
     const separation = this.separate(quadTree)
+    const blackholeForce = this.attractedToBlackholes(blackholes)
 
     this.acceleration.add(alignment)
     this.acceleration.add(cohesion)
     this.acceleration.add(separation)
+    this.acceleration.add(blackholeForce)
   }
 
   // Alignment behavior
-  align(quadTree: QuadTree): Vector2 {
+  align(quadTree: QuadTree<Boid>): Vector2 {
     const perceptionRadius = 50
     const steering = new Vector2(0, 0)
     let total = 0
@@ -39,8 +50,8 @@ export class Boid {
     const nearbyBoids = quadTree.query(range)
 
     for (const other of nearbyBoids) {
-      if (other !== this) {
-        steering.add(other.velocity)
+      if (other.id !== this.point.id) {
+        steering.add(other.data.velocity)
         total++
       }
     }
@@ -56,7 +67,7 @@ export class Boid {
   }
 
   // Cohesion behavior
-  cohere(quadTree: QuadTree): Vector2 {
+  cohere(quadTree: QuadTree<Boid>): Vector2 {
     const perceptionRadius = 50
     const steering = new Vector2(0, 0)
     let total = 0
@@ -66,8 +77,8 @@ export class Boid {
     const nearbyBoids = quadTree.query(range)
 
     for (const other of nearbyBoids) {
-      if (other !== this) {
-        steering.add(other.position)
+      if (other.id !== this.id) {
+        steering.add(other.data.position)
         total++
       }
     }
@@ -84,7 +95,7 @@ export class Boid {
   }
 
   // Separation behavior
-  separate(quadTree: QuadTree): Vector2 {
+  separate(quadTree: QuadTree<Boid>): Vector2 {
     const perceptionRadius = 50
     const steering = new Vector2(0, 0)
     let total = 0
@@ -94,9 +105,9 @@ export class Boid {
     const nearbyBoids = quadTree.query(range)
 
     for (const other of nearbyBoids) {
-      if (other !== this) {
-        const diff = Vector2.subtract(this.position, other.position)
-        const dist = this.position.distance(other.position)
+      if (other.id !== this.id) {
+        const diff = Vector2.subtract(this.position, other.data.position)
+        const dist = this.position.distance(other.data.position)
 
         if (dist < perceptionRadius) {
           // Weight separation force inversely proportional to distance
@@ -117,6 +128,21 @@ export class Boid {
     return steering
   }
 
+  attractedToBlackholes(blackholes: Blackhole[]): Vector2 {
+    const force = new Vector2(0, 0)
+    for (const blackhole of blackholes) {
+      const direction = Vector2.subtract(blackhole.position, this.position)
+      const distance = direction.magnitude()
+      if (distance < blackhole.radius) {
+        direction.normalize()
+        const strength = blackhole.radius / distance
+        direction.multiply(strength)
+        force.add(direction)
+      }
+    }
+    return force
+  }
+
   // Handle Boids going off the edge of the canvas
   edges(width: number, height: number) {
     if (this.position.x > width)
@@ -127,6 +153,13 @@ export class Boid {
       this.position.y = 0
     if (this.position.y < 0)
       this.position.y = height
+  }
+
+  update() {
+    this.position.add(this.velocity)
+    this.velocity.add(this.acceleration)
+    this.velocity.limit(this.maxSpeed)
+    this.acceleration.multiply(0)
   }
 
   // Draw Boid on the canvas
@@ -142,7 +175,7 @@ export class Boid {
     ctx.lineTo(-size / 2, size / 2)
     ctx.lineTo(-size / 2, -size / 2)
     ctx.closePath()
-    ctx.fillStyle = 'rgba(0, 0, 255, 0.5)'
+    ctx.fillStyle = 'rgba(256, 256, 256, 0.75)'
     ctx.fill()
     ctx.restore()
   }

@@ -1,9 +1,11 @@
-export class Point {
+export class Point<Data> {
   x: number
   y: number
-  data: any
+  data: Data
+  id: string
 
-  constructor(x: number, y: number, data?: any) {
+  constructor(id: string, x: number, y: number, data: Data) {
+    this.id = id
     this.x = x
     this.y = y
     this.data = data

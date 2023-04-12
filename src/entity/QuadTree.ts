@@ -2,15 +2,15 @@ import { Rectangle } from './Rectangle'
 import { Circle } from './Circle'
 import type { Point } from './Point'
 
-export class QuadTree {
+export class QuadTree<Data> {
   boundary: Rectangle
   capacity: number
-  points: Point[]
+  points: Point<Data>[]
   divided: boolean
-  northWest: QuadTree | null
-  northEast: QuadTree | null
-  southWest: QuadTree | null
-  southEast: QuadTree | null
+  northWest: QuadTree<Data> | null
+  northEast: QuadTree<Data> | null
+  southWest: QuadTree<Data> | null
+  southEast: QuadTree<Data> | null
 
   constructor(boundary: Rectangle, capacity: number) {
     this.boundary = boundary
@@ -23,7 +23,7 @@ export class QuadTree {
     this.southEast = null
   }
 
-  insert(point: Point): boolean {
+  insert(point: Point<Data>): boolean {
     if (!this.boundary.contains(point))
       return false
 
@@ -57,7 +57,7 @@ export class QuadTree {
     this.divided = true
   }
 
-  query(range: Rectangle | Circle, found: Point[] = []): Point[] {
+  query(range: Rectangle | Circle, found: Point<Data>[] = []): Point<Data>[] {
     if (!this.boundary.intersects(range))
       return found
 

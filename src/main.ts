@@ -1,1 +1,11 @@
-import './assets/styles/style.css'
+import { App } from '@/app'
+
+function onMounted() {
+  const canvas = document.getElementById('canvas') as HTMLCanvasElement
+  const app = new App(canvas)
+  app.init()
+  app.initBoids(5000)
+  app.updateAndDraw()
+}
+
+onMounted()
