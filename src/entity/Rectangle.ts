@@ -14,7 +14,7 @@ export class Rectangle {
     this.halfHeight = halfHeight
   }
 
-  contains(point: Point): boolean {
+  contains(point: Point<unknown>): boolean {
     return (point.x >= this.x - this.halfWidth)
       && (point.x <= this.x + this.halfWidth)
       && (point.y >= this.y - this.halfHeight)
