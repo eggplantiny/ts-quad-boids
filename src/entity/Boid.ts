@@ -18,7 +18,7 @@ export class Boid {
     this.velocity = Vector2.random()
     this.acceleration = new Vector2(0, 0)
     this.maxForce = 0.2
-    this.maxSpeed = 5
+    this.maxSpeed = Math.random() * 10 + 2
     this.id = generateRandomId()
   }
 
