@@ -21,7 +21,7 @@ export class Blackhole {
     return this.radius <= 0
   }
 
-  render(ctx: CanvasRenderingContext2D) {
+  draw(ctx: CanvasRenderingContext2D) {
     if (this.radius < 1)
       return
 

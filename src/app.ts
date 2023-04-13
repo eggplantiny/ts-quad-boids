@@ -56,6 +56,14 @@ export class App {
   // Boids 알고리즘 실행 및 시각화
   updateAndDraw() {
     this.ctx.clearRect(0, 0, this.width, this.height)
+
+    this.draw()
+    this.update()
+
+    requestAnimationFrame(() => this.updateAndDraw())
+  }
+
+  update() {
     this.quadTree = new QuadTree(new Rectangle(this.width / 2, this.height / 2, this.width / 2, this.height / 2), 4)
 
     for (const boid of this.boids)
@@ -65,16 +73,19 @@ export class App {
       boid.flock(this.quadTree, this.blackholes)
       boid.update()
       boid.edges(this.width, this.height)
-      boid.draw(this.ctx)
     }
 
-    for (const blackhole of this.blackholes) {
+    for (const blackhole of this.blackholes)
       blackhole.update()
-      blackhole.render(this.ctx)
-    }
 
     this.blackholes = this.blackholes.filter(blackhole => !blackhole.isExpired())
+  }
 
-    requestAnimationFrame(() => this.updateAndDraw())
+  draw() {
+    for (const boid of this.boids)
+      boid.draw(this.ctx)
+
+    for (const blackhole of this.blackholes)
+      blackhole.draw(this.ctx)
   }
 }
