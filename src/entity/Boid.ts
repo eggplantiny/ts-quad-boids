@@ -1,11 +1,12 @@
 import { Vector2 } from './Vector2'
 import type { QuadTree } from './QuadTree'
 import { Circle } from './Circle'
+import type { Drawable, Updatable } from '@/types/interface.type'
 import type { Blackhole } from '@/entity/Blackhole'
 import { generateRandomId } from '@/utils/random'
 import { Point } from '@/entity/Point'
 
-export class Boid {
+export class Boid implements Drawable, Updatable {
   position: Vector2
   velocity: Vector2
   acceleration: Vector2

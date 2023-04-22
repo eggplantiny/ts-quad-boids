@@ -1,6 +1,7 @@
 import { Vector2 } from '@/entity/Vector2'
+import type { Drawable, Updatable } from '@/types/interface.type'
 
-export class Blackhole {
+export class Blackhole implements Drawable, Updatable {
   position: Vector2
   radius: number
   shrinkRate: number
